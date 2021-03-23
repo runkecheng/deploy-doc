@@ -36,13 +36,14 @@ KubeSphere 提供了多种安装方式：
 
 ### **步骤 3：拉取 krypton Chart**
 
+Chart 代表着 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。
 ```bash
 git clone https://github.com/zhyass/krypton-helm.git
 ```
 
 ### **步骤 4：使用 Helm 部署 Krypton集群**
 
-指定 release 名为 `my-release`:
+指定 release 名为 `my-release`，release 是运行在 Kubernetes 集群中的 chart 的实例。一个 chart 通常可以在同一个集群中安装多次。每一次安装都会创建一个新的 release。
 
 ```bash
 ## For Helm v2
