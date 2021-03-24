@@ -1,10 +1,8 @@
 # **在 Kubesphere 上部署 Krypton 集群**
 
-## **Kubesphere 简介**
+## **简介**
 
 [KubeSphere](https://kubesphere.io) 是在 Kubernetes 之上构建的开源容器混合云，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。KubeSphere 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。
-
-## **Krypton 简介**
 
 Krypton 是基于 MySQL 的开源，高可用性，云原生群集解决方案。通过使用 Raft 协议，Krypton 可以快速进行故障转移，并且不会丢失任何事务。
 
@@ -34,7 +32,7 @@ KubeSphere 提供了多种安装方式：
 
 参考 [KubeSphere 官方文档](https://kubesphere.io/zh/docs/quick-start/create-workspace-and-project/)。
 
-### **步骤 3：拉取 krypton Chart**
+### **步骤 3：拉取 Krypton Chart**
 
 Chart 代表着 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。
 ```bash
@@ -43,7 +41,7 @@ git clone https://github.com/zhyass/krypton-helm.git
 
 ### **步骤 4：使用 Helm 部署 Krypton集群**
 
-指定 release 名为 `my-release`，release 是运行在 Kubernetes 集群中的 chart 的实例。一个 chart 通常可以在同一个集群中安装多次。每一次安装都会创建一个新的 release。
+指定 release 名为 `my-release`，release 是运行在 Kubernetes 集群中的 Chart 的实例。一个 Chart 通常可以在同一个集群中安装多次。每一次安装都会创建一个新的 release。
 
 ```bash
 ## For Helm v2
@@ -60,7 +58,7 @@ $ helm install --name my-release .
 指令执行成功后出现如下提示信息。
 ![部署成功](png/部署成功.png)
 
-登录 KubeSphere 控制台，查看工作负载中的有状态副本集, krypton 已经成功部署。
+登录 KubeSphere 控制台，查看工作负载中的有状态副本集，krypton 已经成功部署。
 ![部署成功控制台显示](png/部署成功控制台显示.png)
 
 ## **访问 Krypton 节点**
@@ -105,7 +103,7 @@ kubectl get secret -n default my-release-krypton1 -o jsonpath="{.data.mysql-pass
 kubectl exec -ti -n default my-release-krypton1-0 -c krypton /krypton/kryptoncli raft status | jq .leader | cut -d . -f 1-2 | tail -c +2
 ```
 
-若主节点名为 `my-release-krypton1-2.my-release-krypton1`, 用户名为 `qingcloud`, 密码为 `Qing@123`, 则连接主节点指令为：
+若主节点名为 `my-release-krypton1-2.my-release-krypton1`，用户名为 `qingcloud`，密码为 `Qing@123`，则连接主节点指令为：
 
 ```bash
 mysql -h my-release-krypton1-2.my-release-krypton1 -u qingcloud -pQing@123
@@ -113,15 +111,33 @@ mysql -h my-release-krypton1-2.my-release-krypton1 -u qingcloud -pQing@123
 
 ### **步骤 5：连接从节点**
 
-从节点为只读节点。
+执行如下命令连接从节点：
 
 ```bash
 mysql -h my-release-krypton1 -u qingcloud -pQing@123
 ```
 
+说明：从节点为只读节点。
+
 ## **配置**
 
-下表列出了 krypton chart 的配置参数及对应的默认值。
+在 `helm install` 时使用 `--set key=value[,key=value]` 指定参数配置，例如，
+
+```bash
+$ cd charts
+$ helm install my-release \
+  --set mysql.mysqlUser=my-user,mysql.mysqlPassword=my-password,mysql.database=my-database .
+```
+
+以上指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
+当然，也可以通过 value.yaml 文件在安装时配置指定参数，例如，
+
+```bash
+cd charts
+helm install my-release -f values.yaml .
+```
+
+下表列出了 Krypton Chart 的配置参数及对应的默认值。
 
 | 参数                                          | 描述                                                                                             |  默认值                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
@@ -193,34 +209,18 @@ mysql -h my-release-krypton1 -u qingcloud -pQing@123
 | `persistence.accessMode`                     | 访问模式                                                                                            | ReadWriteOnce                                   |
 | `persistence.annotations`                    | PV 注解                                                                                            | {}                                              |
 
-在 `helm install` 时使用 `--set key=value[,key=value]` 指定参数配置，例如，
-
-```bash
-$ cd charts
-$ helm install my-release \
-  --set mysql.mysqlUser=my-user,mysql.mysqlPassword=my-password,mysql.database=my-database .
-```
-
-以上指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
-当然，也可以通过 value.yaml 文件在安装时配置指定参数，例如，
-
-```bash
-cd charts
-helm install my-release -f values.yaml .
-```
-
 ## 持久化  
 
-[MySQL](https://hub.docker.com/repository/docker/zhyass/percona57) 镜像在容器路径 `/var/lib/mysql` 中存储 MYSQL 数据和配置。
+[MySQL](https://hub.docker.com/repository/docker/zhyass/percona57) 镜像在容器路径 `/var/lib/mysql` 中存储 MySQL 数据和配置。
 默认情况下，PersistentVolumeClaim 不可用，可以通过更改 values.yaml 文件来启用持久化，开启后 PersistentVolumeClaim 会被自动创建并挂载到目录中。
 
 > *"当Pod分配给节点时，将首先创建一个emptyDir卷，只要该Pod在该节点上运行，该卷便存在。 当Pod从节点中删除时，emptyDir中的数据将被永久删除."*
 
 **注意**：PersistentVolumeClaim 中可以使用不同特性的 PersistentVolume，其 IO 性能会影响数据库的初始化性能。所以当使用 PersistentVolumeClaim 启用持久化存储时，可能需要调整 livenessProbe.initialDelaySeconds 的值。数据库初始化的默认限制是60秒 (livenessProbe.initialDelaySeconds + livenessProbe.periodSeconds * livenessProbe.failureThreshold)。如果初始化时间超过限制，kubelet将重启数据库容器，数据库初始化被中断，会导致持久数据不可用。
 
-## 自定义 MYSQL 配置
+## 自定义 MySQL 配置
 
-在 `mysql.configFiles` 中添加/更改 MYSQL 配置。
+在 `mysql.configFiles` 中添加/更改 MySQL 配置。
 
 ```yaml
   configFiles:
