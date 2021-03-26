@@ -4,7 +4,7 @@
 
 [KubeSphere](https://kubesphere.io) 是在 Kubernetes 之上构建的开源容器混合云，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。KubeSphere 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。
 
-Krypton 是基于 MySQL 的开源，高可用性，云原生群集解决方案。通过使用 Raft 协议，Krypton 可以快速进行故障转移，并且不会丢失任何事务。
+Krypton 是基于 MySQL 的开源，高可用，云原生集群解决方案。通过使用 Raft 协议，Krypton 可以快速进行故障转移，并且不会丢失任何事务。
 
 ## **部署准备**
 
@@ -16,50 +16,132 @@ KubeSphere 提供了多种安装方式：
 - [在 Kubernetes 上安装 Kubersphere](https://kubesphere.io/zh/docs/installing-on-kubernetes/)。
 - [在 Linux 上安装 Kubersphere](https://kubesphere.io/zh/docs/installing-on-linux/)。
 
-## **部署步骤**
+### **创建企业空间、项目、帐户和角色**
 
-### **步骤 1：连接 KubeSphere 客户端节点**
+参考 KubeSphere 官方文档：[创建企业空间、项目、帐户和角色](https://kubesphere.io/zh/docs/quick-start/create-workspace-and-project/)。
 
-使用 [青云控制台](https://console.qingcloud.com/) 连接 KubeSphere 客户端节点。
+### **连接 KubeSphere 客户端节点**
+
+以下示例适用于 KubeSphere 安装在 [青云公有云](https://appcenter.qingcloud.com/apps/app-cmgbd5k2) 。
+
+直接使用 [青云控制台](https://console.qingcloud.com/) 连接 KubeSphere 客户端节点。
 
 ![连接客户端节点](png/连接客户端节点.png)
 
-使用第三方 SSH 工具连接需要在 KubeSphere 配置参数中填入公钥。
+使用第三方 SSH 工具连接客户端节点，需要在 KubeSphere 配置参数中配置公钥。
 
 ![ssh公钥](png/ssh公钥.png)
 
-### **步骤 2：创建企业空间、项目、帐户和角色**
+## **部署步骤**
 
-参考 [KubeSphere 官方文档](https://kubesphere.io/zh/docs/quick-start/create-workspace-and-project/)。
+以下分别介绍使用 [命令行](#使用命令行部署-krypton集群) 和使用 [控制台](#使用控制台部署-krypton-集群) 两种部署方式在 KubeSphere 上部署 Krypton集群。
 
-### **步骤 3：拉取 Krypton Chart**
+### **使用命令行部署 Krypton集群**
 
-Chart 代表着 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。
+#### **步骤 1：拉取 Krypton Chart**
+
+将 Krypton Chart 拉取到 KubeSphere 客户端节点中。
+
 ```bash
 git clone https://github.com/zhyass/krypton-helm.git
 ```
 
-### **步骤 4：使用 Helm 部署 Krypton集群**
+Chart 代表着 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。
 
-指定 release 名为 `my-release`，release 是运行在 Kubernetes 集群中的 Chart 的实例。一个 Chart 通常可以在同一个集群中安装多次。每一次安装都会创建一个新的 release。
+#### **步骤 2：部署**
+
+**默认部署**只需指定 release 名称，以下为指定 release 名为 `my-release` 的默认部署指令。
+
+说明：release 是运行在 Kubernetes 集群中的 Chart 的实例。
 
 ```bash
 ## For Helm v2
-$ cd charts
-$ helm install . --name my-release
+cd charts
+helm install . my-release
 
 ## For Helm v3
-$ cd charts
-$ helm install --name my-release .
+cd charts
+helm install my-release .
 ```
 
-以上指令使用默认配置在 Kubernets 中部署 krypton 集群，[配置](#配置)中列出了可在安装过程中配置的参数。
+**指定参数部署**可在 `helm install` 时使用 `--set key=value[,key=value]` 指令，例如，
 
-指令执行成功后出现如下提示信息。
+```bash
+cd charts
+helm install my-release \
+  --set mysql.mysqlUser=my-user,mysql.mysqlPassword=my-password,mysql.database=my-database .
+```
+
+以上指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
+当然，也可以通过 value.yaml 文件在安装时配置指定参数，例如，
+
+```bash
+cd charts
+helm install my-release -f values.yaml .
+```
+
+更多配置参数，可参考 [配置](#配置) ，其中列出了所有可在安装过程中配置的参数。
+
+默认部署指令执行成功后出现如下提示信息。
 ![部署成功](png/部署成功.png)
 
-登录 KubeSphere 控制台，查看工作负载中的有状态副本集，krypton 已经成功部署。
-![部署成功控制台显示](png/部署成功控制台显示.png)
+登录 KubeSphere 控制台，查看工作负载中的有状态副本集，Krypton 已经成功部署。
+![控制台部署成功](png/控制台部署成功.png)
+
+### **使用控制台部署 Krypton 集群**
+
+#### **步骤 1：制作 Krypton Chart 压缩包**
+
+拉取 Krypton Chart。
+
+```bash
+git clone https://github.com/zhyass/krypton-helm.git
+```
+
+打包生成 tgz 或 tar.gz 文件。
+
+```bash
+cd krypton-helm
+helm package charts
+```
+
+![打包chart](png/打包chart.png)
+
+#### **步骤 2：控制台部署**
+
+登录 KubeSphere 的 Web 控制台，进入 **平台管理** 的 **访问控制** 界面。进入提前创建好的 `krypton-workspace` **企业空间。**
+
+![企业空间](png/企业空间.png)
+
+选择 **应用管理** 中的 **应用模板**。
+
+![应用管理](png/应用管理.png)
+
+选择 **创建** ，在弹窗中上传打包好的 Krypton Chart 文件。
+
+![上传](png/上传.png)
+
+选择 **项目管理**，进入提前创建好的 `krypton-deploy` 项目中，选择 **应用负载** 中的 **应用**。
+
+![应用负载](png/应用负载.png)
+
+选择 **部署新应用**，在弹窗中选择 **来自应用模板**，选择 `krypton1`。
+
+![部署新应用](png/部署新应用.png)
+
+编辑基本信息。
+
+![基本信息](png/基本信息.png)
+
+编辑应用配置，点击 **部署** 即可完成部署。
+
+![应用配置](png/应用配置.png)
+
+说明：示例使用默认参数部署。
+
+查看 **应用负载** 中的 **工作负载**，选择 **有状态副本集**，release 名为 `my-release` 的 Krypton 集群已成功部署。
+
+![控制台部署成功](png/控制台部署成功.png)
 
 ## **访问 Krypton 节点**
 
@@ -97,45 +179,23 @@ kubectl get secret -n default my-release-krypton1 -o jsonpath="{.data.mysql-pass
 
 ### **步骤 4：连接主节点**
 
-获取主节点名称。
+使用默认用户名，密码连接主节点。
 
 ```bash
-kubectl exec -ti -n default my-release-krypton1-0 -c krypton /krypton/kryptoncli raft status | jq .leader | cut -d . -f 1-2 | tail -c +2
-```
-
-若主节点名为 `my-release-krypton1-2.my-release-krypton1`，用户名为 `qingcloud`，密码为 `Qing@123`，则连接主节点指令为：
-
-```bash
-mysql -h my-release-krypton1-2.my-release-krypton1 -u qingcloud -pQing@123
+mysql -h my-release-krypton1-master -u qingcloud -p
 ```
 
 ### **步骤 5：连接从节点**
 
-执行如下命令连接从节点：
+使用默认用户名，密码连接从节点。
 
 ```bash
-mysql -h my-release-krypton1 -u qingcloud -pQing@123
+mysql -h my-release-krypton1-slave -u qingcloud -pQing@123
 ```
 
 说明：从节点为只读节点。
 
 ## **配置**
-
-在 `helm install` 时使用 `--set key=value[,key=value]` 指定参数配置，例如，
-
-```bash
-$ cd charts
-$ helm install my-release \
-  --set mysql.mysqlUser=my-user,mysql.mysqlPassword=my-password,mysql.database=my-database .
-```
-
-以上指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
-当然，也可以通过 value.yaml 文件在安装时配置指定参数，例如，
-
-```bash
-cd charts
-helm install my-release -f values.yaml .
-```
 
 下表列出了 Krypton Chart 的配置参数及对应的默认值。
 
