@@ -197,23 +197,45 @@ apt-get update && apt-get install mysql-client -y
 kubectl get secret -n default my-release-krypton1 -o jsonpath="{.data.mysql-password}" | base64 --decode; echo
 ```
 
-### **步骤 4：连接主节点**
+### **步骤 4：连接节点**
 
-使用默认用户名连接主节点。
+#### **客户端在同一项目中**
 
-```bash
-mysql -h my-release-krypton1-master -u <用户名> -p
-```
+当客户端和 Krypton 集群在同一个项目中时，主节点 Host 可以使用 `<release>-krypton-master` 代替，从节点 Host 可以使用 `<release>-krypton-master` 代替。
 
-### **步骤 5：连接从节点**
-
-使用默认用户名，密码连接从节点。
+连接主节点。
 
 ```bash
-mysql -h my-release-krypton1-slave -u <用户名> -p<密码>
+mysql -h my-release-krypton-master -u <用户名> -p
 ```
 
->说明：从节点为只读节点。
+连接从节点。
+
+```bash
+mysql -h my-release-krypton1-slave -u <用户名> -p
+```
+
+#### **客户端不在同一项目中**
+
+在 Krypton 集群所属项目的**项目管理**管理中心，选择 **应用负载** > **服务**，查看主从节点对应的服务。
+
+![服务](png/服务.png)
+
+查看主节点端口及其所在的 Kubernetes 节点地址。
+
+![主节点端口](png/主节点端口.png)
+
+查看从节点端口及其所在的 Kubernetes 节点地址。
+
+![从节点端口](png/从节点端口.png)
+
+连接节点
+
+```bash
+mysql -p <节点地址> -u <用户名> -P <节点端口> -p
+```
+
+> 说明：使用外网主机连接可能会出现 `SSL connection error`，需要在加上 `--ssl-mode=DISABLE` 参数，关闭 SSL。
 
 ## **配置**
 
