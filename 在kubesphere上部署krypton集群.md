@@ -4,39 +4,39 @@
 
 [KubeSphere](https://kubesphere.io) 是在 Kubernetes 之上构建的开源容器混合云，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。KubeSphere 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。
 
-Krypton 是基于 MySQL 的开源，高可用，云原生集群解决方案。通过使用 Raft 协议，Krypton 可以快速进行故障转移，并且不会丢失任何事务。
+Krypton 是基于 MySQL 的开源、高可用、云原生集群解决方案。通过使用 Raft 协议，Krypton 可以快速进行故障转移，且不会丢失任何事务。
 
 ## **部署准备**
 
 ### **安装 KubeSphere**
 
-KubeSphere 提供了多种安装方式：
+可选择如下安装方式：
 
-- 在 [青云公有云](https://appcenter.qingcloud.com/apps/app-cmgbd5k2) 上一键安装 Kubersphere。
+- 在 [青云QingCloud AppCenter](https://appcenter.qingcloud.com/apps/app-cmgbd5k2) 上安装 Kubersphere。
 - [在 Kubernetes 上安装 Kubersphere](https://kubesphere.io/zh/docs/installing-on-kubernetes/)。
 - [在 Linux 上安装 Kubersphere](https://kubesphere.io/zh/docs/installing-on-linux/)。
 
-### **创建企业空间、项目、帐户和角色**
+### **创建 KubeSphere 多租户系统**
 
 参考 KubeSphere 官方文档：[创建企业空间、项目、帐户和角色](https://kubesphere.io/zh/docs/quick-start/create-workspace-and-project/)。
 
 ### **连接 KubeSphere 客户端节点**
 
-以下示例适用于 KubeSphere 安装在 [青云公有云](https://appcenter.qingcloud.com/apps/app-cmgbd5k2) 。
+> 说明：如下示例适用于 KubeSphere 安装在 [青云QingCloud AppCenter](https://appcenter.qingcloud.com/apps/app-cmgbd5k2) 的场景。
 
-直接使用 [青云控制台](https://console.qingcloud.com/) 连接 KubeSphere 客户端节点。
+通过[青云QingCloud控制台](https://console.qingcloud.com/) 直接连接客户端节点。
 
 ![连接客户端节点](png/连接客户端节点.png)
 
-使用第三方 SSH 工具连接客户端节点，需要在 KubeSphere 配置参数中配置公钥。
+通过第三方 SSH 工具连接客户端节点，请先在 KubeSphere 配置参数中配置公钥。
 
 ![ssh公钥](png/ssh公钥.png)
 
 ## **部署步骤**
 
-以下分别介绍使用 [命令行](#使用命令行部署-krypton集群) 和使用 [控制台](#使用控制台部署-krypton-集群) 两种部署方式在 KubeSphere 上部署 Krypton集群。
+可选择 [命令行](#使用命令行部署-krypton集群) 和使用 [控制台](#使用控制台部署-krypton-集群) 两种部署方式部署 Krypton 集群。
 
-### **使用命令行部署 Krypton集群**
+### **通过命令行部署 Krypton集群**
 
 #### **步骤 1：拉取 Krypton Chart**
 
@@ -46,51 +46,55 @@ KubeSphere 提供了多种安装方式：
 git clone https://github.com/zhyass/krypton-helm.git
 ```
 
-Chart 代表着 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。
+> Chart 代表 [Helm](https://helm.sh/zh/docs/intro/using_helm/) 包，包含在 Kubernetes 集群内部运行应用程序、工具或服务所需的所有资源定义。
 
 #### **步骤 2：部署**
 
-**默认部署**只需指定 release 名称，以下为指定 release 名为 `my-release` 的默认部署指令。
+* **默认部署**
 
-说明：release 是运行在 Kubernetes 集群中的 Chart 的实例。
+  需指定 release 名称，以下为指定 release 名为 `my-release` 的默认部署指令。
+  
+  > 说明：release 是运行在 Kubernetes 集群中的 Chart 的实例。
 
-```bash
-## For Helm v2
-cd charts
-helm install . my-release
+  ```bash
+  ## For Helm v2
+    cd charts
+    helm install . my-release
 
-## For Helm v3
-cd charts
-helm install my-release .
-```
+  ## For Helm v3
+    cd charts
+    helm install my-release .
+  ```
 
-**指定参数部署**可在 `helm install` 时使用 `--set key=value[,key=value]` 指令，例如，
+* **指定参数部署**
 
-```bash
-cd charts
-helm install my-release \
+  在 `helm install` 时使用 `--set key=value[,key=value]` 指令。以下指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
+
+  ```bash
+  cd charts
+  helm install my-release \
   --set mysql.mysqlUser=my-user,mysql.mysqlPassword=my-password,mysql.database=my-database .
-```
+  ```
 
-以上指令创建了一个用户名为 `my-user` ，密码为 `my-password` 的标准数据库用户，可访问名为 `my-database` 的数据库。
-当然，也可以通过 value.yaml 文件在安装时配置指定参数，例如，
+  通过 value.yaml 文件，在安装时配置指定参数，如下指令。更多安装过程中可配置的参数，请参考 [配置](#配置) 。
 
-```bash
-cd charts
-helm install my-release -f values.yaml .
-```
+  ```bash
+  cd charts
+  helm install my-release -f values.yaml .
+  ```
 
-更多配置参数，可参考 [配置](#配置) ，其中列出了所有可在安装过程中配置的参数。
+#### **步骤 3：部署校验**
 
-默认部署指令执行成功后出现如下提示信息。
+默认部署指令执行完成后，回显如下提示信息，则部署指令执行成功。
 ![部署成功](png/部署成功.png)
 
-登录 KubeSphere 控制台，查看工作负载中的有状态副本集，Krypton 已经成功部署。
+登录 KubeSphere 的 Web 控制台，在**工作负载**中选择**有状态副本集**页签，可查看到目标副本集，则Krypton 已经成功部署。
+
 ![控制台部署成功](png/控制台部署成功.png)
 
-### **使用控制台部署 Krypton 集群**
+### **通过控制台部署 Krypton 集群**
 
-#### **步骤 1：制作 Krypton Chart 压缩包**
+#### **步骤 1：创建 Krypton Chart 压缩包**
 
 拉取 Krypton Chart。
 
@@ -107,45 +111,59 @@ helm package charts
 
 ![打包chart](png/打包chart.png)
 
-#### **步骤 2：控制台部署**
+#### **步骤 2：部署**
 
-登录 KubeSphere 的 Web 控制台，进入 **平台管理** 的 **访问控制** 界面。进入提前创建好的 `krypton-workspace` **企业空间。**
+（1）登录 KubeSphere 的 Web 控制台。
+
+（2）选择 **平台管理 > 访问控制** ，进入平台级的访问控制页面。
+
+（3）选择**企业空间**，并点击已创建的 `krypton-workspace` 企业空间名称，进入企业空间管理页面。
 
 ![企业空间](png/企业空间.png)
 
-选择 **应用管理** 中的 **应用模板**。
+（4）上传压缩包。
+
+  选择 **应用管理 > 应用模板**，进入应用模板配置页面。
 
 ![应用管理](png/应用管理.png)
 
-选择 **创建** ，在弹窗中上传打包好的 Krypton Chart 文件。
+  点击 **创建** ，在弹窗中上传步骤一创建的 Krypton Chart 压缩包。
 
 ![上传](png/上传.png)
 
-选择 **项目管理**，进入提前创建好的 `krypton-deploy` 项目中，选择 **应用负载** 中的 **应用**。
+（5）部署新应用。
+
+  点击 **项目管理**，进入已创建的 `krypton-deploy` 项目管理中心。
+
+  ![项目管理](png/项目管理.png)
+  
+  选择 **应用负载 > 应用**，进入项目应用管理页面。
 
 ![应用负载](png/应用负载.png)
 
-选择 **部署新应用**，在弹窗中选择 **来自应用模板**，选择 `krypton1`。
+  点击 **部署新应用**，在 **来自应用模板**窗口中选择 `krypton1`。
 
 ![部署新应用](png/部署新应用.png)
 
-编辑基本信息。
-
+  编辑应用模板基本信息。
+  
 ![基本信息](png/基本信息.png)
 
-编辑应用配置，点击 **部署** 即可完成部署。
+  编辑应用配置，点击**部署** 即可完成部署。
 
 ![应用配置](png/应用配置.png)
 
-说明：示例使用默认参数部署。
+  >说明：示例使用默认参数部署。
 
-查看 **应用负载** 中的 **工作负载**，选择 **有状态副本集**，release 名为 `my-release` 的 Krypton 集群已成功部署。
+#### **步骤 3：部署校验**
+
+在**项目管理**管理中心，选择 **应用负载 > 工作负载**，并选择**有状态副本集**页签，可查看到release 名为 `my-release` 的副本集，则 Krypton 集群已成功部署。
 
 ![控制台部署成功](png/控制台部署成功.png)
 
 ## **访问 Krypton 节点**
 
-Krypton 由一个主节点和两个从节点组成，每个节点都可以通过如下方式访问：
+Krypton 由一个主节点和两个从节点组成，可通过如下命令访问每个Krypton节点：
 
 ```txt
 <pod-name>.my-release-krypton1
@@ -155,7 +173,7 @@ Krypton 由一个主节点和两个从节点组成，每个节点都可以通过
 
 ### **步骤 1：创建 Client**
 
-创建一个用于连接 Krypton 集群的客户端主机。
+连接 Krypton 集群需要一个客户端主机，以下指令为在 KubeSphere 客户端节点中使用命令行创建主机。
 
 ```bash
 kubectl run -i --tty ubuntu --image=ubuntu:focal --restart=Never -- bash -il
@@ -171,7 +189,9 @@ apt-get update && apt-get install mysql-client -y
 
 ### **步骤 3：获取密码**
 
-获取 MySQL 用户密码，默认用户名为 `qingcloud`，默认密码为 `Qing@123`。
+获取 MySQL 用户密码。
+
+一般默认用户名为 `qingcloud`，默认密码为 `Qing@123`。
 
 ```bash
 kubectl get secret -n default my-release-krypton1 -o jsonpath="{.data.mysql-password}" | base64 --decode; echo
@@ -179,10 +199,10 @@ kubectl get secret -n default my-release-krypton1 -o jsonpath="{.data.mysql-pass
 
 ### **步骤 4：连接主节点**
 
-使用默认用户名，密码连接主节点。
+使用默认用户名连接主节点。
 
 ```bash
-mysql -h my-release-krypton1-master -u qingcloud -p
+mysql -h my-release-krypton1-master -u <用户名> -p
 ```
 
 ### **步骤 5：连接从节点**
@@ -190,20 +210,20 @@ mysql -h my-release-krypton1-master -u qingcloud -p
 使用默认用户名，密码连接从节点。
 
 ```bash
-mysql -h my-release-krypton1-slave -u qingcloud -pQing@123
+mysql -h my-release-krypton1-slave -u <用户名> -p<密码>
 ```
 
-说明：从节点为只读节点。
+>说明：从节点为只读节点。
 
 ## **配置**
 
 下表列出了 Krypton Chart 的配置参数及对应的默认值。
 
-| 参数                                          | 描述                                                                                             |  默认值                                          |
+| 参数                                   | 描述                                                                                             |  默认值                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
 | `imagePullPolicy`                            | 镜像拉取策略                                                                                       | `IfNotPresent`                                  |
-| `fullnameOverride`                           | 自定义全名覆盖                                                                                      |                                                 |
-| `nameOverride`                               | 自定义名称覆盖                                                                                      |                                                 |
+| `fullnameOverride`                           | 自定义全名覆盖                                                                                      |                                  -               |
+| `nameOverride`                               | 自定义名称覆盖                                                                                      |                          -                       |
 | `replicaCount`                               | Pod 数目                                                                                          | `3`                                             |
 | `busybox.image`                              | `busybox` 镜像库地址                                                                               | `busybox`                                       |
 | `busybox.tag`                                | `busybox` 镜像标签                                                                                 | `1.32`                                          |
@@ -226,12 +246,12 @@ mysql -h my-release-krypton1-slave -u qingcloud -pQing@123
 | `mysql.readinessProbe.timeoutSeconds`        | 就绪探针执行检测请求后，等待响应的超时时间                                                                | 1                                               |
 | `mysql.readinessProbe.successThreshold`      | 就绪探针检测失败后认为成功的最小连接成功次数                                                               | 1                                               |
 | `mysql.readinessProbe.failureThreshold`      | 就绪探测失败的重试次数，重试一定次数后将认为容器未就绪                                                       | 3                                               |
-| `mysql.extraEnvVars`                         | 其他作为字符串传递给 `tpl` 函数的环境变量                                                                |                                                 |
+| `mysql.extraEnvVars`                         | 其他作为字符串传递给 `tpl` 函数的环境变量                                                                |         -                                        |
 | `mysql.resources`                            | `MySQL` 的资源请求/限制                                                                               | 内存: `256Mi`, CPU: `100m`                    |
 | `krypton.image`                              | `krypton` 镜像库地址                                                                                 | `zhyass/krypton`                                |
 | `krypton.tag`                                | `krypton` 镜像标签                                                                                   | `beta0.1.0`                                     |
 | `krypton.args`                               | 要传递到 krypton 容器的其他参数                                                                        | `[]`                                            |
-| `krypton.extraEnvVars`                       | 其他作为字符串传递给 `tpl` 函数的环境变量                                                                 |                                                 |
+| `krypton.extraEnvVars`                       | 其他作为字符串传递给 `tpl` 函数的环境变量                                                                 |                        -                         |
 | `krypton.livenessProbe.initialDelaySeconds`  | Pod 启动后首次进行存活检查的等待时间                                                                      | 30                                              |
 | `krypton.livenessProbe.periodSeconds`        | 存活检查的间隔时间                                                                                     | 10                                              |
 | `krypton.livenessProbe.timeoutSeconds`       | 存活探针执行检测请求后，等待响应的超时时间                                                                 | 5                                               |
@@ -272,15 +292,18 @@ mysql -h my-release-krypton1-slave -u qingcloud -pQing@123
 ## 持久化  
 
 [MySQL](https://hub.docker.com/repository/docker/zhyass/percona57) 镜像在容器路径 `/var/lib/mysql` 中存储 MySQL 数据和配置。
-默认情况下，PersistentVolumeClaim 不可用，可以通过更改 values.yaml 文件来启用持久化，开启后 PersistentVolumeClaim 会被自动创建并挂载到目录中。
 
-> *"当Pod分配给节点时，将首先创建一个emptyDir卷，只要该Pod在该节点上运行，该卷便存在。 当Pod从节点中删除时，emptyDir中的数据将被永久删除."*
+默认情况下，PersistentVolumeClaim 不可用，需通过修改 values.yaml 文件来启用持久化。开启后， PersistentVolumeClaim 会被自动创建并挂载到目录中。
 
-**注意**：PersistentVolumeClaim 中可以使用不同特性的 PersistentVolume，其 IO 性能会影响数据库的初始化性能。所以当使用 PersistentVolumeClaim 启用持久化存储时，可能需要调整 livenessProbe.initialDelaySeconds 的值。数据库初始化的默认限制是60秒 (livenessProbe.initialDelaySeconds + livenessProbe.periodSeconds * livenessProbe.failureThreshold)。如果初始化时间超过限制，kubelet将重启数据库容器，数据库初始化被中断，会导致持久数据不可用。
+> 将Pod分配给节点时，需创建一个emptyDir卷，只要Pod在该节点上运行，该卷便存在。若将Pod从节点中删除，emptyDir中的数据将被永久删除。
+
+当使用 PersistentVolumeClaim 启用持久化存储时，需要同时修改 **livenessProbe.initialDelaySeconds** 的参数值。
+
+>说明：PersistentVolumeClaim 中可以使用不同特性的 PersistentVolume，其 IO 性能会影响数据库的初始化性能。数据库初始化的默认限制是60秒，即livenessProbe.initialDelaySeconds + livenessProbe.periodSeconds * livenessProbe.failureThreshold的值。若初始化时间超过限制，kubelet将重启数据库容器，数据库初始化被中断，会导致持久数据不可用。
 
 ## 自定义 MySQL 配置
 
-在 `mysql.configFiles` 中添加/更改 MySQL 配置。
+执行如下命令，在 `mysql.configFiles` 中添加/更改 MySQL 配置。
 
 ```yaml
   configFiles:
@@ -292,4 +315,3 @@ mysql -h my-release-krypton1-slave -u qingcloud -pQing@123
       # custom mysql configuration.
       expire_logs_days=7
 ```
-
