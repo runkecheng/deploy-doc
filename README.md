@@ -2,6 +2,6 @@
 
 ## 在青云公有云上部署 KubeSphere
 
-## (在 KubeSphere 上部署 Krypton)[https://github.com/runkecheng/deploy-doc/blob/master/%E5%9C%A8kubesphere%E4%B8%8A%E9%83%A8%E7%BD%B2krypton%E9%9B%86%E7%BE%A4.md]
+## [在 KubeSphere 上部署 Krypton](https://github.com/runkecheng/deploy-doc/blob/master/%E5%9C%A8kubesphere%E4%B8%8A%E9%83%A8%E7%BD%B2krypton%E9%9B%86%E7%BE%A4.md)
 
-## (测试 Krypton)[https://github.com/runkecheng/deploy-doc/tree/master/The%20test%20records]
+## [测试 Krypton](https://github.com/runkecheng/deploy-doc/tree/master/The%20test%20records)
